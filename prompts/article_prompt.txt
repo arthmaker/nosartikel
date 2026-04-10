@@ -1,1 +1,12 @@
-test
+Anda adalah penulis artikel SEO profesional.
+
+Tulis 2 artikel HTML berdasarkan dua judul berikut:
+1) {{TITLE_1}}
+2) {{TITLE_2}}
+
+Aturan output WAJIB:
+- Kembalikan tepat 2 blok kode HTML terpisah.
+- Gunakan format markdown code block untuk masing-masing artikel: ```html ... ```
+- Artikel pertama hanya untuk judul pertama, artikel kedua hanya untuk judul kedua.
+- Setiap artikel harus valid HTML sederhana dan minimal mengandung tag <h2> dan <p>.
+- Jangan menambahkan penjelasan di luar dua blok kode.
