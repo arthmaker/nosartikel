@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nosartikel Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Nosartikel Dashboard</h1>
+
+      <section class="panel">
+        <h2>Input Judul (10)</h2>
+        <p class="hint">Isi manual atau upload file .txt (1 judul per baris).</p>
+
+        <div class="upload-row">
+          <input type="file" id="txtFileInput" accept=".txt" />
+          <button id="resetBtn" type="button">Reset</button>
+        </div>
+
+        <div id="titlesGrid" class="titles-grid"></div>
+
+        <button id="generateBtn" class="primary" type="button">Generate</button>
+      </section>
+
+      <section class="panel">
+        <h2>Progress & Status</h2>
+        <div class="progress-wrap">
+          <div id="progressBar" class="progress-bar">0%</div>
+        </div>
+        <p id="statusText">Belum ada proses.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Result</h2>
+        <textarea id="resultBox" readonly placeholder="Hasil compiled_output.txt akan muncul di sini..."></textarea>
+        <div class="actions-row">
+          <button id="copyBtn" type="button">Copy</button>
+          <a id="downloadBtn" class="button-link disabled" href="#" aria-disabled="true">Download</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

@@ -1,15 +1,26 @@
-# nosartikel (MVP)
+# nosartikel (MVP + Dashboard Flask)
 
-Tool backend sederhana untuk automasi generate 10 artikel HTML menggunakan OpenAI Responses API dalam 5 batch (2 judul per batch).
+Tool ini memiliki dua mode penggunaan:
+
+1. **Mode Dashboard (Flask + HTML/JS)** untuk input judul dari browser, melihat progress, copy output, dan download hasil.
+2. **Mode CLI (legacy)** yang tetap dipertahankan (`python src/main.py`).
+
+Fondasi generator lama tetap dipakai: OpenAI Responses API, prompt template, retry parse 1 kali, validasi 10 judul non-kosong, dan format output marker tetap sama.
 
 ## Struktur Proyek
 
-- `.github/workflows/generate-articles.yml` — workflow manual GitHub Actions.
+- `.github/workflows/generate-articles.yml` — workflow manual GitHub Actions (mode CLI).
+- `app.py` — backend Flask untuk dashboard.
+- `templates/index.html` — halaman dashboard.
+- `static/style.css` — styling dashboard.
+- `static/app.js` — logic frontend (upload txt, generate, polling status, copy, download, reset).
+- `src/job_store.py` — penyimpanan state/output job berbasis file.
+- `jobs/` — output per job dashboard (`status.json`, artikel, compiled output).
 - `prompts/article_prompt.txt` — template prompt utama dengan placeholder judul.
-- `inputs/titles.txt` — input judul (tepat 10 judul, satu judul per baris).
-- `output_articles/` — folder output hasil artikel.
+- `inputs/titles.txt` — input judul mode CLI (tepat 10 judul, satu judul per baris).
+- `output_articles/` — folder output mode CLI.
 - `src/config.py` — konfigurasi path, model, dan rule bisnis.
-- `src/main.py` — entry point orchestration.
+- `src/main.py` — entry point mode CLI.
 - `src/generator.py` — pemanggilan OpenAI Responses API.
 - `src/parser.py` — parsing dan validasi HTML hasil model.
 - `src/formatter.py` — formatter `compiled_output.txt`.
@@ -20,41 +31,91 @@ Tool backend sederhana untuk automasi generate 10 artikel HTML menggunakan OpenA
 - Python 3.11+
 - OpenAI API key aktif
 
-## Cara Pakai Lokal
+Install dependencies:
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-2. Set environment variable API key:
-   ```bash
-   export OPENAI_API_KEY="your_api_key"
-   ```
+Set environment variable:
 
-3. Pastikan `inputs/titles.txt` berisi tepat 10 judul non-kosong (satu baris per judul).
+```bash
+export OPENAI_API_KEY="your_api_key"
+```
 
-4. Jalankan generator dari root project:
-   ```bash
-   python src/main.py
-   ```
+---
 
-## Format Input Judul
+## Menjalankan Dashboard (Flask)
+
+Jalankan dari root project:
+
+```bash
+python app.py
+```
+
+Buka browser ke:
+
+- `http://127.0.0.1:5000/`
+
+### Fitur Dashboard
+
+- Isi 10 judul manual.
+- Upload file `.txt` (1 judul/baris) untuk auto-fill 10 input pertama non-kosong.
+- Klik **Generate** untuk membuat job.
+- Progress bar tampil 20/40/60/80/100 sesuai batch 1-5.
+- Status batch aktif tampil (`Batch x/5`).
+- Setelah selesai, hasil `compiled_output.txt` tampil di textarea.
+- Tombol **Copy** untuk menyalin output.
+- Tombol **Download** untuk unduh hasil final `.txt`.
+- Tombol **Reset** untuk reset form dan state UI.
+
+### API Dashboard
+
+- `GET /` → render dashboard.
+- `POST /api/generate` → mulai job baru.
+  - Payload JSON:
+    ```json
+    {"titles": ["judul 1", "judul 2", "...", "judul 10"]}
+    ```
+- `GET /api/status/<job_id>` → status progres job.
+- `GET /api/result/<job_id>` → hasil final jika job selesai.
+- `GET /api/download/<job_id>` → download `compiled_output.txt`.
+
+### Struktur Output Job Dashboard
+
+Disimpan di `jobs/<job_id>/`:
+
+- `status.json`
+- `article_01.html` sampai `article_10.html`
+- `compiled_output.txt`
+
+---
+
+## Menjalankan Mode CLI (Legacy Tetap Aktif)
+
+1. Pastikan `inputs/titles.txt` berisi tepat 10 judul non-kosong (satu baris per judul).
+2. Jalankan:
+
+```bash
+python src/main.py
+```
+
+Output CLI:
+
+- `output_articles/article_01.html` sampai `output_articles/article_10.html`
+- `output_articles/compiled_output.txt`
+
+## Format Input Judul (CLI)
 
 File: `inputs/titles.txt`
 
 - Tepat 10 baris non-kosong.
 - 1 baris = 1 judul artikel.
-- Jika jumlah bukan 10, proses akan berhenti dengan error yang jelas.
+- Jika jumlah bukan 10, proses berhenti dengan error jelas.
 
-## Output
+## Format `compiled_output.txt` (Tetap)
 
-Setelah berhasil, output ada di folder `output_articles/`:
-
-- `article_01.html` sampai `article_10.html`
-- `compiled_output.txt`
-
-Format `compiled_output.txt` dihasilkan persis dengan pola berikut (hanya isi artikel yang berbeda):
+Format output final tetap sama:
 
 ```text
 -###-
@@ -108,15 +169,23 @@ Format `compiled_output.txt` dihasilkan persis dengan pola berikut (hanya isi ar
 [artikel 10]
 ```
 
-## Cara Pakai via GitHub Actions
+---
+
+## GitHub Actions (Tetap Dipertahankan)
+
+Workflow lama tetap ada: `.github/workflows/generate-articles.yml`
+
+Langkah pakai:
 
 1. Tambahkan secret repository: `OPENAI_API_KEY`.
-2. Buka tab **Actions** di GitHub.
+2. Buka tab **Actions**.
 3. Pilih workflow **Generate Articles**.
 4. Klik **Run workflow**.
-5. Setelah selesai, download artifact `output-articles` untuk mengambil hasil di folder `output_articles/`.
+5. Download artifact `output-articles`.
 
 ## Catatan MVP
 
-- Tool hanya fokus pada alur inti: baca 10 judul, generate per batch, parse 2 artikel, validasi minimal, lalu simpan output.
-- Tidak ada UI, database, Docker, atau fitur di luar scope.
+- Tidak menggunakan database.
+- Tidak menggunakan websocket/Celery/Redis.
+- Tidak mengekspos API key ke frontend.
+- Logika inti tetap di backend Python dan reuse modul generator lama.
