@@ -48,7 +48,6 @@ def run() -> None:
     template = PROMPT_TEMPLATE_PATH.read_text(encoding="utf-8")
 
     generator = ArticleGenerator(api_key=OPENAI_API_KEY, model=OPENAI_MODEL)
-
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     all_articles: list[str] = []
@@ -57,7 +56,6 @@ def run() -> None:
         prompt = render_prompt(template, title_1, title_2)
         max_attempts = MAX_PARSE_RETRY + 1
 
-        last_error: Exception | None = None
         for attempt in range(1, max_attempts + 1):
             try:
                 raw_output = generator.generate_batch(prompt)
@@ -67,14 +65,10 @@ def run() -> None:
                 all_articles.extend(articles)
                 break
             except Exception as exc:
-                last_error = exc
                 if attempt == max_attempts:
                     raise RuntimeError(
                         f"Batch {batch_index} gagal setelah {max_attempts} percobaan: {exc}"
                     ) from exc
-
-        if last_error is not None and len(all_articles) < batch_index * BATCH_SIZE:
-            raise RuntimeError(f"Batch {batch_index} gagal diproses: {last_error}")
 
     if len(all_articles) != EXPECTED_TITLES_COUNT:
         raise RuntimeError(

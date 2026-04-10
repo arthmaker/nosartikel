@@ -34,7 +34,7 @@ Tool backend sederhana untuk automasi generate 10 artikel HTML menggunakan OpenA
 
 3. Pastikan `inputs/titles.txt` berisi tepat 10 judul non-kosong (satu baris per judul).
 
-4. Jalankan generator:
+4. Jalankan generator dari root project:
    ```bash
    python src/main.py
    ```
@@ -54,20 +54,58 @@ Setelah berhasil, output ada di folder `output_articles/`:
 - `article_01.html` sampai `article_10.html`
 - `compiled_output.txt`
 
-Format `compiled_output.txt` mengikuti pola marker:
+Format `compiled_output.txt` dihasilkan persis dengan pola berikut (hanya isi artikel yang berbeda):
 
 ```text
 -###-
 111
 -$$$-
-[konten artikel 1]
+[artikel 1]
 
-...
+-###-
+222
+-$$$-
+[artikel 2]
+
+-###-
+333
+-$$$-
+[artikel 3]
+
+-###-
+444
+-$$$-
+[artikel 4]
+
+-###-
+555
+-$$$-
+[artikel 5]
+
+-###-
+666
+-$$$-
+[artikel 6]
+
+-###-
+777
+-$$$-
+[artikel 7]
+
+-###-
+888
+-$$$-
+[artikel 8]
+
+-###-
+999
+-$$$-
+[artikel 9]
 
 -###-
 101010
 -$$$-
-[konten artikel 10]
+[artikel 10]
 ```
 
 ## Cara Pakai via GitHub Actions
