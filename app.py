@@ -9,6 +9,7 @@ from typing import Any
 from flask import Flask, jsonify, render_template, request, send_file
 
 from src.config import (
+    BATCH_SIZE,
     EXPECTED_TITLES_COUNT,
     MAX_PARSE_RETRY,
     OPENAI_API_KEY,
@@ -19,12 +20,20 @@ from src.config import (
 from src.formatter import build_compiled_output
 from src.generator import ArticleGenerator
 from src.job_store import JobStore
-from src.main import make_batches, render_prompt
 from src.parser import extract_two_html_articles, validate_article_html
 
 app = Flask(__name__)
 job_store = JobStore()
 
+
+
+
+def make_batches(titles: list[str]) -> list[tuple[str, str]]:
+    return [(titles[i], titles[i + 1]) for i in range(0, len(titles), BATCH_SIZE)]
+
+
+def render_prompt(template: str, title_1: str, title_2: str) -> str:
+    return template.replace("{{TITLE_1}}", title_1).replace("{{TITLE_2}}", title_2)
 
 def _normalize_titles(raw_titles: list[str]) -> list[str]:
     titles = [title.strip() for title in raw_titles if title and title.strip()]
